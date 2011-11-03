@@ -1,4 +1,13 @@
 <?php
+/*
+Plugin Name: WP NoCaptcha Plugin
+Plugin URI: http://www.lysender.com
+Description: Adds javascript based invisible captcha on comment forms.
+Version: 0.1.0
+Author: Lysender
+Author URI: http://www.lysender.com
+License: GPL2
+*/
 	
 	require_once dirname(__FILE__).'/wp-nocpatcha.class.php';
 
