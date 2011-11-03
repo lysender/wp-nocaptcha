@@ -9,14 +9,14 @@ Author URI: http://www.lysender.com
 License: GPL2
 */
 	
-	require_once dirname(__FILE__).'/wp-nocpatcha.class.php';
+	require_once dirname(__FILE__).'/wp-nocaptcha.class.php';
 
 	$wpNoCaptcha = new WP_NoCaptcha_Plugin;
 
 	/** 
 	 * Filter before posting comment - preprocess comment
 	 */
-	function wp_nocpatcha_comment_post($comment)
+	function nocpatcha_comment_post($comment)
 	{
 		global $wpNoCaptcha;
 
@@ -48,11 +48,11 @@ License: GPL2
 	        return $comment;
 	    }
 
-	    if (isset($_POST['captcha_nocaptcha']) && !empty($POST['captcha_nocaptcha']))
+	    if (isset($_POST['captcha_nocaptcha']) && !empty($_POST['captcha_nocaptcha']))
 	    {
 	    	$c = trim($_POST['captcha_nocaptcha']);
-
-	    	if ($c === $wpNoCaptcha->getValue())
+	    	
+	    	if ($c === $wpNoCaptcha->getToken())
 	    	{
 	    		return $comment;
 	    	}
@@ -65,7 +65,7 @@ License: GPL2
 	/** 
 	 * Adding nocaptcha on form
 	 */
-	function wp_nocaptcha_comment_form_wp3()
+	function nocaptcha_comment_form_wp3()
 	{
     	global $wpNoCaptcha;
 
@@ -74,27 +74,48 @@ License: GPL2
 	    {
 	        return true;
 	    }
-	    
-	    // Generate the captcha token
-	    $token = $wpNoCaptcha->setToken(uniqid(time(), true));
-
-	    // Write to cookie for ready it later on
-	    $wpNoCaptcha->writeCookie();
 
 	    echo '<input type="hidden" name="captcha_nocaptcha" id="captcha_nocaptcha" />';
-	    echo '<script type="text/javascript">'
-	    	.'window.onload = function(){'
-	    		.'var field_nocaptcha = document.getElementById("captcha_nocaptcha");'
-	    		.'if (field_nocaptcha) {'
-	    			.'field_nocaptcha = "'.$token.'"'
-	    		.'}'
-	    	.'};'
-	    	.'</script>';
+	    echo '<script type="text/javascript">
+	    		$(function(){
+	    			var d = {action: "nocaptcha_token"};
+	    			var u = "'.admin_url('admin-ajax.php').'";
+
+	    			$.post(u, d, function(data){
+	    				if (data) {
+	    					$("#captcha_nocaptcha").val(data);
+	    				}
+	    			});
+	    		});
+	    	</script>';
 
     	return true;
 	}
 
+	/** 
+	 * Generates the captcha token and return it
+	 * Also writes the cookie
+	 */
+	function nocaptcha_ajax_get_token()
+	{
+		global $wpNoCaptcha;
+
+	    // Generate the captcha token
+	    $wpNoCaptcha->setToken(uniqid(time(), true));
+	    $token = $wpNoCaptcha->getToken();
+
+	    // Write to cookie 
+	    $wpNoCaptcha->writeCookie();
+
+	    echo $token;
+	    die();
+	}
+
 	// Initialize
-	add_filter('preprocess_comment', 'wp_nocpatcha_comment_post', 1);
-    add_action('comment_form_after_fields', 'wp_nocaptcha_comment_form_wp3', 1);
-    add_action('comment_form_logged_in_after', 'wp_nocaptcha_comment_form_wp3', 1);
+	add_filter('preprocess_comment', 'nocpatcha_comment_post', 1);
+    add_action('comment_form_after_fields', 'nocaptcha_comment_form_wp3', 1);
+    add_action('comment_form_logged_in_after', 'nocaptcha_comment_form_wp3', 1);
+
+    // Add ajax action
+	add_action('wp_ajax_nocaptcha_token', 'nocaptcha_ajax_get_token');
+	add_action('wp_ajax_nopriv_nocaptcha_token', 'nocaptcha_ajax_get_token');

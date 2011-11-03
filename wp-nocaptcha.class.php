@@ -2,14 +2,9 @@
 
 class WP_NoCaptcha_Plugin {
 	
-	protected $_cookieName = 'nocpatchatok';
+	protected $_cookieName = 'nocaptchatok';
 	protected $_salt = '+MuZ0(<-Unvqg|[Fb^{?N0wW>l92ttzZqAB|9+*<ZYk}6.*ixg{AdHjIo>Fj(!T2';
 	protected $_value;
-
-	public function __construct()
-	{
-		$this->readCookie();
-	}
 
 	public function generateSignedValue($value)
 	{
@@ -22,7 +17,7 @@ class WP_NoCaptcha_Plugin {
 
 		if ($rawValue !== '~' && count($chunks) === 2)
 		{
-			if ($chunks[0] === $this->generateSignedValue($chunks[1]))
+			if ($chunks[0] === sha1($this->_salt.$chunks[1]))
 			{
 				return $chunks[1];
 			}
@@ -48,8 +43,8 @@ class WP_NoCaptcha_Plugin {
 			$token = $this->generateSignedValue($this->_value);
 
 			// Expire previous
-			set_cookie($this->_cookieName, '', time() - (3600*24), '/');
-			set_cookie($this->_cookieName, $token, time() + (3600*24), '/');
+			setcookie($this->_cookieName, '', time() - (3600*24), '/');
+			setcookie($this->_cookieName, $token, time() + (3600*24), '/');
 		}
 
 		return $this;
