@@ -106,7 +106,7 @@ function nocaptcha_comment_form_wp3()
 
 			$(function(){
 				var d = {action: "nocaptcha_token"};
-				var u = "'.plugins_url('wp-nocaptcha-token.php', __FILE__).'";
+				var u = "'.plugins_url('wp-captcha-nocaptcha/wp-nocaptcha-token.php').'";
 
 				$.post(u, d, function(data){
 					if (data) {
