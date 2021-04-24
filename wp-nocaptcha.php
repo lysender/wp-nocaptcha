@@ -85,7 +85,7 @@ function nocaptcha_comment_form_wp3()
 
 				setToken: function() {
 					if (this.token) {
-						$("#captcha_nocaptcha").val(this.token);
+						jQuery("#captcha_nocaptcha").val(this.token);
 						this.tokenSet = true;
 					}
 					return this;
@@ -104,15 +104,15 @@ function nocaptcha_comment_form_wp3()
 				}
 			};
 
-			$(function(){
+			jQuery(function(){
 				var d = {action: "nocaptcha_token"};
 				var u = "'.plugins_url('wp-captcha-nocaptcha/wp-nocaptcha-token.php').'";
 
-				$.post(u, d, function(data){
+				jQuery.post(u, d, function(data){
 					if (data) {
-						WPNoCaptcha.token = $.trim(data);
+						WPNoCaptcha.token = jQuery.trim(data);
 
-						$("#commentform #comment").keypress(WPNoCaptcha.keyPressed);
+						jQuery("#commentform #comment").keypress(WPNoCaptcha.keyPressed);
 					}
 				});
 			});
